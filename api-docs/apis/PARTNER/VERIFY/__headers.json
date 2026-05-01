@@ -1,0 +1,20 @@
+[
+  {
+    "id": 0,
+    "key": "User-Agent",
+    "value": "curl/8.2.1",
+    "isEnabled": true
+  },
+  {
+    "id": 1,
+    "key": "Accept",
+    "value": "*/*",
+    "isEnabled": true
+  },
+  {
+    "id": 2,
+    "key": "Content-Type",
+    "value": "application/json",
+    "isEnabled": true
+  }
+]

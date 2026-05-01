@@ -1,0 +1,6 @@
+{
+  "$schema": "https://assets.requestly.com/local/v1.0.1/body.json",
+  "contentType": "json",
+  "raw": "{\n  firstname: 'John',\n  lastname: 'Doe',\n  phone: '9876543212',\n  businessCategory: '69f449d726871a9f8d009acb',\n}",
+  "rawContentType": "application/json"
+}

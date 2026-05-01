@@ -1,0 +1,6 @@
+{
+  "$schema": "https://assets.requestly.com/local/v1.0.1/body.json",
+  "contentType": "json",
+  "raw": "{\n  name: 'Doe Tyre Services',\n  location: 'Pune',\n  coordinates: { lat: 18.5204, lng: 73.8567 },\n  tags: ['69f4511026871a9f8d009b84', '69f4511026871a9f8d009b85'],\n}",
+  "rawContentType": "application/json"
+}
