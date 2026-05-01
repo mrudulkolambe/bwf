@@ -37,7 +37,7 @@ export class PartnerAuthService {
     }
 
     static async checkPhone(phoneNumber: string, options?: ServiceOptions<{ exists: boolean }>) {
-        return this.handleRequest(API.post<{ exists: boolean }>(APIs.partnerCheckPhone, { phone: phoneNumber }), options);
+        return this.handleRequest(API.post<{ exists: boolean }>(APIs.partnerCheckPhone, { phoneNumber }), options);
     }
 
     static async login(phone: string, code: string, options?: ServiceOptions<PartnerAuthResponse>) {
