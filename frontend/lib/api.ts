@@ -25,7 +25,7 @@ class API {
     private static getInstance(): AxiosInstance {
         if (!this.instance) {
             this.instance = axios.create({
-                baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
+                baseURL: "",
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -97,7 +97,7 @@ class API {
                 const instance = this.getInstance();
                 const response = await instance.get<T>(url, { params, headers });
                 const serverData = response.data as any;
-                
+
                 if (serverData && typeof serverData === 'object' && 'success' in serverData && 'data' in serverData) {
                     return serverData;
                 }
@@ -125,7 +125,7 @@ class API {
             const instance = this.getInstance();
             const response = await instance.post<T>(url, data, { params, headers });
             const serverData = response.data as any;
-            
+
             if (serverData && typeof serverData === 'object' && 'success' in serverData && 'data' in serverData) {
                 return serverData;
             }
@@ -145,7 +145,7 @@ class API {
             const instance = this.getInstance();
             const response = await instance.put<T>(url, data, { params, headers });
             const serverData = response.data as any;
-            
+
             if (serverData && typeof serverData === 'object' && 'success' in serverData && 'data' in serverData) {
                 return serverData;
             }
@@ -165,7 +165,7 @@ class API {
             const instance = this.getInstance();
             const response = await instance.patch<T>(url, data, { params, headers });
             const serverData = response.data as any;
-            
+
             if (serverData && typeof serverData === 'object' && 'success' in serverData && 'data' in serverData) {
                 return serverData;
             }
@@ -189,7 +189,7 @@ class API {
             }
             const response = await instance.delete<T>(url, config);
             const serverData = response.data as any;
-            
+
             if (serverData && typeof serverData === 'object' && 'success' in serverData && 'data' in serverData) {
                 return serverData;
             }

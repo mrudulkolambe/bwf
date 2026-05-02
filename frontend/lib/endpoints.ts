@@ -3,7 +3,7 @@ const getBaseUrl = () => {
 };
 
 const apiBuilder = (path: string) => {
-    const base = getBaseUrl();
+    const base = ""
     const apiBase = base.includes('localhost') ? `${base}/api` : `/api`;
     const finalURL = `${apiBase}${path}`
     return finalURL
