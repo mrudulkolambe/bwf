@@ -1,0 +1,5 @@
+{
+  "$schema": "https://assets.requestly.com/local/v1.0.1/auth.json",
+  "type": "bearer_token",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZjYzOTI0MTM0ODZiMWEwNTIwOGFiZiIsInBob25lIjoiNzA1NzA5NDc3MiIsImlhdCI6MTc3Nzc0NDE2NCwiZXhwIjoxNzgwMzM2MTY0fQ.UZ1qPkt7FEEZQsOLXkshvE_aIjxBX1PyPQP5ZveNRCc"
+}

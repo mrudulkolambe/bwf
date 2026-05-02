@@ -1,0 +1,10 @@
+{
+  "$schema": "https://assets.requestly.com/local/v1.0.1/metadata.json",
+  "type": "api",
+  "entryType": "http",
+  "id": "d81425b7-e102-441c-9624-807680917741",
+  "rank": "",
+  "url": "https://bestworkingfirst.in/api/partners/me",
+  "method": "GET",
+  "contentType": "none"
+}
