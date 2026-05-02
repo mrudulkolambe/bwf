@@ -12,7 +12,8 @@ export const getToken = () => {
 
 export const setToken = (token: string) => {
     if (typeof document === 'undefined') return;
-    document.cookie = `bwf-auth-token=${token}; path=/; max-age=2592000`; // 30 days
+    const isSecure = window.location.protocol === 'https:';
+    document.cookie = `bwf-auth-token=${token}; path=/; max-age=2592000; SameSite=Lax${isSecure ? '; Secure' : ''}`;
 }
 
 export const clearToken = () => {
