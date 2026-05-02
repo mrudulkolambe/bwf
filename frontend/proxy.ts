@@ -47,7 +47,7 @@ export async function proxy(request: NextRequest) {
             cache: 'no-store',
         });
 
-        if (response.status !== 401) {
+        if (response.status === 401) {
             console.log('[Proxy] Token invalid or profile fetch failed');
             const res = NextResponse.redirect(new URL('/auth/role', request.url));
             res.cookies.delete('bwf-auth-token');
