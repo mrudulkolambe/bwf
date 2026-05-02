@@ -23,10 +23,12 @@ interface RegistrationContextType {
         selectedTags: string[]
     }
     loading: boolean
+    partnerData: any | null
     setRole: (role: "partner" | "customer" | "admin" | null) => void
     setPhone: (phone: string) => void
     updateBasicDetails: (details: Partial<RegistrationContextType["basicDetails"]>) => void
     updateBusinessDetails: (details: Partial<RegistrationContextType["businessDetails"]>) => void
+    setPartnerData: (data: any) => void
 }
 
 const RegistrationContext = createContext<RegistrationContextType | undefined>(undefined)
@@ -35,6 +37,7 @@ export const RegistrationProvider = ({ children }: { children: React.ReactNode }
     const router = useRouter()
     const pathname = usePathname()
     const [loading, setLoading] = useState(true)
+    const [partnerData, setPartnerData] = useState<any>(null)
     const [role, setRole] = useState<RegistrationContextType["role"]>("partner")
     const [phone, setPhone] = useState("")
     const [basicDetails, setBasicDetails] = useState({
@@ -62,13 +65,13 @@ export const RegistrationProvider = ({ children }: { children: React.ReactNode }
         const token = getToken()
         if (!token) {
             setLoading(false)
-            // If no token and not on role/phone/login pages, might want to redirect
             return
         }
 
         await partnerAuthService.getProfile({
             setLoading,
             onSuccess: (partner) => {
+                setPartnerData(partner)
                 setPhone(partner.phone)
                 setBasicDetails({
                     firstname: partner.firstname || "",
@@ -82,19 +85,6 @@ export const RegistrationProvider = ({ children }: { children: React.ReactNode }
                     coordinates: partner.business?.coordinates || null,
                     selectedTags: partner.business?.tags || []
                 })
-
-                // Redirect based on onboarding status
-                if (pathname.startsWith('/auth')) {
-                    if (!partner.onboarding?.basic) {
-                        router.replace("/auth/basic")
-                    } else if (!partner.onboarding?.business) {
-                        router.replace("/auth/business")
-                    } else if (!partner.onboarding?.completed) {
-                        router.replace("/auth/verify")
-                    } else {
-                        router.replace("/dashboard")
-                    }
-                }
             },
             onError: (err) => {
                 console.error("Failed to fetch profile:", err)
@@ -104,8 +94,52 @@ export const RegistrationProvider = ({ children }: { children: React.ReactNode }
     }
 
     useEffect(() => {
-        fetchProfile()
-    }, [])
+        const publicRoutes = [
+            '/',
+            '/auth/role',
+            '/auth/phone',
+            '/auth/login',
+            '/auth/basic',
+        ];
+
+        const isPublicRoute = publicRoutes.some((r) => pathname === r || pathname.startsWith(r + '/'));
+
+        if (isPublicRoute) {
+            setLoading(false);
+            return;
+        }
+
+        const token = getToken();
+        if (!token) {
+            router.replace('/auth/role');
+            setLoading(false);
+            return;
+        }
+
+        if (!partnerData) {
+            fetchProfile();
+        } else {
+            const onboarding = partnerData.onboarding;
+            if (!onboarding?.basic) {
+                if (pathname !== '/auth/basic') {
+                    router.replace("/auth/basic")
+                }
+            } else if (!onboarding?.business) {
+                if (pathname !== '/auth/business') {
+                    router.replace("/auth/business")
+                }
+            } else if (!onboarding?.completed) {
+                if (pathname !== '/auth/verify') {
+                    router.replace("/auth/verify")
+                }
+            } else {
+                if (pathname.startsWith('/auth')) {
+                    router.replace("/dashboard")
+                }
+            }
+            setLoading(false);
+        }
+    }, [pathname, partnerData]);
 
     return (
         <RegistrationContext.Provider value={{
@@ -113,7 +147,7 @@ export const RegistrationProvider = ({ children }: { children: React.ReactNode }
             phone, setPhone,
             basicDetails, updateBasicDetails,
             businessDetails, updateBusinessDetails,
-            loading
+            loading, partnerData, setPartnerData
         }}>
             {children}
         </RegistrationContext.Provider>
