@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function proxy(request: NextRequest) {
+    console.log("COOKIES", request.cookies.get('bwf-auth-token')?.value)
     const token = request.cookies.get('bwf-auth-token')?.value;
-    console.log("COOKIES", request.cookies.getAll())
     const pathname = request.nextUrl.pathname;
 
     // Define the base API URL for server-side fetching
@@ -23,16 +23,10 @@ export async function proxy(request: NextRequest) {
     const isPublicRoute = publicRoutes.some((r) => pathname === r || pathname.startsWith(r + '/'));
 
     if (isPublicRoute) {
-        if (token && pathname === '/auth/role') {
-            // If they have a token and are trying to go to role selection, 
-            // we should let the validation below handle where they belong
-        } else {
-            return NextResponse.next();
-        }
+        return NextResponse.next();
     }
 
     if (!token) {
-        // Redirect to initial step if no token is found on private routes
         return NextResponse.redirect(new URL('/auth/role', request.url));
     }
 
