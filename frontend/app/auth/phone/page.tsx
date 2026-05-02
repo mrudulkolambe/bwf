@@ -28,7 +28,12 @@ export default function PhonePage() {
                 }
             },
             onError: (message) => {
-                console.error(message)
+                console.error("Phone check error:", message)
+                // If there's an error but we have a phone, we might want to let them try registering
+                // as a fallback if the error is essentially "not found"
+                if (message.includes("not found") || message.includes("exist")) {
+                    router.push("/auth/basic")
+                }
             }
         })
     }

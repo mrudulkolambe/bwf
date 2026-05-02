@@ -19,6 +19,7 @@ interface RegistrationContextType {
         category: string
         name: string
         address: string
+        coordinates: { lat: number; lng: number } | null
         selectedTags: string[]
     }
     loading: boolean
@@ -45,6 +46,7 @@ export const RegistrationProvider = ({ children }: { children: React.ReactNode }
         category: "",
         name: "",
         address: "",
+        coordinates: null as { lat: number; lng: number } | null,
         selectedTags: [] as string[]
     })
 
@@ -77,6 +79,7 @@ export const RegistrationProvider = ({ children }: { children: React.ReactNode }
                     category: partner.businessCategory || "",
                     name: partner.business?.name || "",
                     address: partner.business?.location || "",
+                    coordinates: partner.business?.coordinates || null,
                     selectedTags: partner.business?.tags || []
                 })
 

@@ -12,6 +12,7 @@ import PartnerService from "../../login/services/partner.service"
 import CategoryService from "../../login/services/category.service"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import OlaMap from "@/components/app/ola-map"
 
 const partnerAuthService = new PartnerAuthService()
 const categoryService = new CategoryService()
@@ -54,6 +55,7 @@ export default function BusinessPage() {
             data: {
                 name: businessDetails.name,
                 location: businessDetails.address,
+                coordinates: businessDetails.coordinates,
                 tags: businessDetails.selectedTags
             },
             onSuccess: () => {
@@ -80,14 +82,27 @@ export default function BusinessPage() {
                 value={businessDetails.name}
                 onChange={(e) => updateBusinessDetails({ name: e.target.value })}
             />
-            <InputField
-                placeholder="Enter your business address"
-                id="address"
-                label="Business address"
-                type="text"
-                value={businessDetails.address}
-                onChange={(e) => updateBusinessDetails({ address: e.target.value })}
-            />
+            
+            <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Business Location
+                </label>
+                <OlaMap 
+                    apiKey={process.env.NEXT_PUBLIC_OLA_MAPS_API_KEY || ""}
+                    initialCenter={businessDetails.coordinates || undefined}
+                    onLocationSelect={(location) => {
+                        updateBusinessDetails({ 
+                            address: location.address,
+                            coordinates: location.coordinates
+                        })
+                    }}
+                />
+                {businessDetails.address && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                        Selected: {businessDetails.address}
+                    </p>
+                )}
+            </div>
 
             <div className="flex flex-col gap-2 mt-2">
                 <p className="text-sm font-medium">Select tags that describe your business</p>
