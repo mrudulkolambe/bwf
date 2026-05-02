@@ -2,6 +2,7 @@ import API from "@/lib/api";
 import APIs from "@/lib/endpoints";
 import { PartnerCreateRequest } from "./types/partner.auth.request.types";
 import { PartnerAuthResponse } from "./types/partner.auth.response.types";
+import { setToken } from "@/lib/token";
 
 class PartnerAuthService {
     createPartner = async ({ setLoading, data, onSuccess, onError }: {
@@ -14,6 +15,7 @@ class PartnerAuthService {
         const response = await API.post<PartnerAuthResponse>(APIs.partners, data);
         setLoading(false);
         if (response.success) {
+            setToken(response.data?.token as string)
             onSuccess(response.data as PartnerAuthResponse);
         } else {
             onError(response.message);

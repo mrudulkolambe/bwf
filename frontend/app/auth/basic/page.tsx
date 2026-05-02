@@ -47,9 +47,6 @@ export default function BasicDetailsPage() {
                 businessCategory: businessDetails.category
             },
             onSuccess: (data) => {
-                if (data.token) {
-                    setToken(data.token)
-                }
                 router.push("/auth/business")
             },
             onError: (message) => {
@@ -116,7 +113,7 @@ export default function BasicDetailsPage() {
                 onChange={(e) => updateBasicDetails({ email: e.target.value })}
             />
 
-            <Button onClick={handleContinue} className="w-full h-12 mt-4">
+            <Button loading={loading} onClick={handleContinue} className="w-full h-12 mt-4">
                 Continue
             </Button>
         </div>
