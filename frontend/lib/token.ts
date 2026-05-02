@@ -10,6 +10,11 @@ export const getToken = () => {
     return cookies['bwf-auth-token'];
 }
 
+export const setToken = (token: string) => {
+    if (typeof document === 'undefined') return;
+    document.cookie = `bwf-auth-token=${token}; path=/; max-age=2592000`; // 30 days
+}
+
 export const clearToken = () => {
     if (typeof document === 'undefined') return;
     document.cookie = 'bwf-auth-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';

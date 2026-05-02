@@ -4,14 +4,10 @@
   "variables": {
     "baseURL": {
       "id": "39f5e397-c003-4b23-872f-95b7f631f79a",
-      "syncValue": "http://localhost:8080",
+      "syncValue": "http://localhost:3000",
       "type": "string",
       "isEnabled": true,
-      "rank": "a0",
-      "createdAt": "2026-05-01T05:43:07.538Z",
-      "updatedAt": "2026-05-01T05:43:07.538Z",
-      "createdBy": null,
-      "updatedBy": null
+      "rank": "a0"
     }
   }
 }

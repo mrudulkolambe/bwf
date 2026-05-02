@@ -45,7 +45,9 @@ const SelectField = ({
                 disabled={disabled}
             >
                 <SelectTrigger id={id} className="w-full">
-                    <SelectValue placeholder={placeholder} />
+                    <SelectValue>
+                        {options.find(opt => opt.value === value)?.label || placeholder}
+                    </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                     {options.map((option) => (

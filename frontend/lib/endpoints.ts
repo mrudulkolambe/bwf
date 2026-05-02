@@ -4,16 +4,19 @@ const getBaseUrl = () => {
 
 const apiBuilder = (path: string) => {
     const base = getBaseUrl();
-    // For Vercel experimentalServices, we use the routePrefix defined in vercel.json
-    const apiBase = base.includes('localhost') ? `${base}/api` : `/_/backend/api`;
+    const apiBase = base.includes('localhost') ? `${base}/api` : `/api`;
     const finalURL = `${apiBase}${path}`
     return finalURL
 };
 
 const APIs = {
-    login: apiBuilder('/auth/login'),
+    login: apiBuilder('/partners/login'),
     partners: apiBuilder('/partners'),
-    partnerCheckPhone: apiBuilder('/partners/check-phone')
+    partnerCheckPhone: apiBuilder('/partners/check-phone'),
+    partnerMe: apiBuilder('/partners/me'),
+    partnerBusiness: apiBuilder('/partners/business'),
+    partnerVerifyCode: apiBuilder('/partners/verify-code'),
+    categories: apiBuilder('/categories')
 }
 
 export default APIs

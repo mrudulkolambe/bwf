@@ -1,22 +1,65 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import RoleButton from "./components/role"
 import { Briefcase, ShieldCheck, User } from "lucide-react"
 import InputField from "@/components/app/input-field"
 import { Button } from "@/components/ui/button"
 import SelectField from "@/components/app/select-field"
-import { PartnerAuthService } from "./services/partner.auth.service"
+import PartnerAuthService from "./services/partner.auth.service"
+import CategoryService from "./services/category.service"
+import { CategoryResponse } from "./services/types/category.response.types"
+
+const partnerAuthService = new PartnerAuthService();
+const categoryService = new CategoryService();
 
 const LoginPage = () => {
     const [step, setStep] = useState<"role-selection" | "phone" | "basic" | "business" | "verify" | "login">("role-selection")
     const [role, setRole] = useState<"partner" | "customer" | "admin" | null>(null)
     const [phone, setPhone] = useState<string>("")
     const [loading, setLoading] = useState<boolean>(false)
+    const [categories, setCategories] = useState<CategoryResponse[]>([])
+    const [basicDetails, setBasicDetails] = useState({
+        firstname: "",
+        lastname: "",
+        email: ""
+    })
+    const [businessDetails, setBusinessDetails] = useState({
+        category: "",
+        name: "",
+        address: ""
+    })
+
+    const handleBasicChange = (key: keyof typeof basicDetails, value: string) => {
+        setBasicDetails(prev => ({ ...prev, [key]: value }))
+    }
+
+    const handleBusinessChange = (key: keyof typeof businessDetails, value: string) => {
+        setBusinessDetails(prev => ({ ...prev, [key]: value }))
+    }
+
+    const fetchCategories = async () => {
+        await categoryService.getCategories({
+            setLoading,
+            lang: "en",
+            onSuccess: (data: CategoryResponse[]) => {
+                console.log(data)
+                setCategories(data)
+            },
+            onError: (message: string) => {
+                console.error(message)
+            }
+        })
+    }
+
+    useEffect(() => {
+        fetchCategories()
+    }, [])
 
     const checkPhone = async () => {
-        await PartnerAuthService.checkPhone(phone, {
+        await partnerAuthService.checkPhone({
             setLoading,
+            phoneNumber: phone,
             onSuccess: (data) => {
                 if (data.exists) {
                     setStep("verify")
@@ -87,7 +130,7 @@ const LoginPage = () => {
                                     placeholder="Enter your phone number"
                                     id="phone"
                                     label="Phone number"
-                                    type="text"
+                                    type="number"
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value)}
                                 />
@@ -107,22 +150,21 @@ const LoginPage = () => {
                                     <p className="text-muted-foreground">We will use this information to create your account</p>
                                 </div>
                                 <SelectField
-                                    placeholder="Select your gender"
-                                    id="gender"
-                                    label="Gender"
-                                    value={""}
-                                    onValueChange={() => { }}
-                                    options={[
-                                        { label: "Male", value: "male" },
-                                        { label: "Female", value: "female" },
-                                        { label: "Other", value: "other" },
-                                    ]}
+                                    placeholder="Select your business category"
+                                    id="businessCategory"
+                                    label="Business Category"
+                                    value={businessDetails.category}
+                                    onValueChange={(val) => handleBusinessChange("category", val || "")}
+                                    options={categories.map(cat => ({
+                                        label: cat.title,
+                                        value: cat._id
+                                    }))}
                                 />
                                 <InputField
                                     placeholder="Enter your phone number"
                                     id="phone"
                                     label="Phone number"
-                                    type="text"
+                                    type="number"
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value)}
                                     disabled={true}
@@ -132,24 +174,24 @@ const LoginPage = () => {
                                     id="firstname"
                                     label="Firstname"
                                     type="text"
-                                    value={""}
-                                    onChange={() => { }}
+                                    value={basicDetails.firstname}
+                                    onChange={(e) => handleBasicChange("firstname", e.target.value)}
                                 />
                                 <InputField
                                     placeholder="Eg. Doe"
                                     id="lastname"
                                     label="Lastname"
                                     type="text"
-                                    value={""}
-                                    onChange={() => { }}
+                                    value={basicDetails.lastname}
+                                    onChange={(e) => handleBasicChange("lastname", e.target.value)}
                                 />
                                 <InputField
                                     placeholder="Eg. john.doe@gmail.com"
                                     id="email"
                                     label="Email"
                                     type="text"
-                                    value={""}
-                                    onChange={() => { }}
+                                    value={basicDetails.email}
+                                    onChange={(e) => handleBasicChange("email", e.target.value)}
                                 />
 
                                 <Button onClick={() => setStep("business")}>Continue</Button>
@@ -171,16 +213,16 @@ const LoginPage = () => {
                                     id="name"
                                     label="Business name"
                                     type="text"
-                                    value={""}
-                                    onChange={() => { }}
+                                    value={businessDetails.name}
+                                    onChange={(e) => handleBusinessChange("name", e.target.value)}
                                 />
                                 <InputField
                                     placeholder="Enter your business address"
                                     id="address"
                                     label="Business address"
                                     type="text"
-                                    value={""}
-                                    onChange={() => { }}
+                                    value={businessDetails.address}
+                                    onChange={(e) => handleBusinessChange("address", e.target.value)}
                                 />
 
 

@@ -96,6 +96,12 @@ class API {
             try {
                 const instance = this.getInstance();
                 const response = await instance.get<T>(url, { params, headers });
+                const serverData = response.data as any;
+                
+                if (serverData && typeof serverData === 'object' && 'success' in serverData && 'data' in serverData) {
+                    return serverData;
+                }
+
                 return {
                     success: true,
                     message: "success",
@@ -118,6 +124,12 @@ class API {
         try {
             const instance = this.getInstance();
             const response = await instance.post<T>(url, data, { params, headers });
+            const serverData = response.data as any;
+            
+            if (serverData && typeof serverData === 'object' && 'success' in serverData && 'data' in serverData) {
+                return serverData;
+            }
+
             return {
                 success: true,
                 message: "success",
@@ -132,6 +144,12 @@ class API {
         try {
             const instance = this.getInstance();
             const response = await instance.put<T>(url, data, { params, headers });
+            const serverData = response.data as any;
+            
+            if (serverData && typeof serverData === 'object' && 'success' in serverData && 'data' in serverData) {
+                return serverData;
+            }
+
             return {
                 success: true,
                 message: "success",
@@ -146,6 +164,12 @@ class API {
         try {
             const instance = this.getInstance();
             const response = await instance.patch<T>(url, data, { params, headers });
+            const serverData = response.data as any;
+            
+            if (serverData && typeof serverData === 'object' && 'success' in serverData && 'data' in serverData) {
+                return serverData;
+            }
+
             return {
                 success: true,
                 message: "success",
@@ -164,6 +188,12 @@ class API {
                 config.data = data;
             }
             const response = await instance.delete<T>(url, config);
+            const serverData = response.data as any;
+            
+            if (serverData && typeof serverData === 'object' && 'success' in serverData && 'data' in serverData) {
+                return serverData;
+            }
+
             return {
                 success: true,
                 message: "success",

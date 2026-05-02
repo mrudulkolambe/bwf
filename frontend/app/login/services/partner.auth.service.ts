@@ -1,46 +1,88 @@
 import API from "@/lib/api";
+import APIs from "@/lib/endpoints";
 import { PartnerCreateRequest } from "./types/partner.auth.request.types";
 import { PartnerAuthResponse } from "./types/partner.auth.response.types";
-import APIs from "@/lib/endpoints";
 
-export interface ServiceOptions<T> {
-    setLoading?: (loading: boolean) => void;
-    onSuccess?: (data: T) => void;
-    onError?: (message: string) => void;
-}
-
-export class PartnerAuthService {
-    private static async handleRequest<T>(
-        request: Promise<any>,
-        options?: ServiceOptions<T>
-    ) {
-        const { setLoading, onSuccess, onError } = options || {};
-        setLoading?.(true);
-        try {
-            const response = await request;
-            if (response.success) {
-                onSuccess?.(response.data);
-            } else {
-                onError?.(response.message);
-            }
-            return response;
-        } catch (error: any) {
-            onError?.(error.message || "An error occurred");
-            return { success: false, message: error.message, data: null };
-        } finally {
-            setLoading?.(false);
+class PartnerAuthService {
+    createPartner = async ({ setLoading, data, onSuccess, onError }: {
+        setLoading: (loading: boolean) => void,
+        data: PartnerCreateRequest,
+        onSuccess: (data: PartnerAuthResponse) => void,
+        onError: (message: string) => void
+    }) => {
+        setLoading(true);
+        const response = await API.post<PartnerAuthResponse>(APIs.partners, data);
+        setLoading(false);
+        if (response.success) {
+            onSuccess(response.data as PartnerAuthResponse);
+        } else {
+            onError(response.message);
         }
-    }
+    };
 
-    static async createPartner(data: PartnerCreateRequest, options?: ServiceOptions<PartnerAuthResponse>) {
-        return this.handleRequest(API.post<PartnerAuthResponse>(APIs.partners, data), options);
-    }
+    checkPhone = async ({ setLoading, phoneNumber, onSuccess, onError }: {
+        setLoading: (loading: boolean) => void,
+        phoneNumber: string,
+        onSuccess: (data: { exists: boolean }) => void,
+        onError: (message: string) => void
+    }) => {
+        setLoading(true);
+        const response = await API.post<{ exists: boolean }>(APIs.partnerCheckPhone, { phoneNumber });
+        setLoading(false);
+        if (response.success) {
+            onSuccess(response.data as { exists: boolean });
+        } else {
+            onError(response.message);
+        }
+    };
 
-    static async checkPhone(phoneNumber: string, options?: ServiceOptions<{ exists: boolean }>) {
-        return this.handleRequest(API.post<{ exists: boolean }>(APIs.partnerCheckPhone, { phoneNumber }), options);
-    }
+    login = async ({ setLoading, phone, code, onSuccess, onError }: {
+        setLoading: (loading: boolean) => void,
+        phone: string,
+        code: string,
+        onSuccess: (data: PartnerAuthResponse) => void,
+        onError: (message: string) => void
+    }) => {
+        setLoading(true);
+        const response = await API.post<PartnerAuthResponse>(APIs.login, { phone, code });
+        setLoading(false);
+        if (response.success) {
+            onSuccess(response.data as PartnerAuthResponse);
+        } else {
+            onError(response.message);
+        }
+    };
 
-    static async login(phone: string, code: string, options?: ServiceOptions<PartnerAuthResponse>) {
-        return this.handleRequest(API.post<PartnerAuthResponse>(APIs.login, { phone, code }), options);
-    }
+    updateProfile = async ({ setLoading, data, onSuccess, onError }: {
+        setLoading: (loading: boolean) => void,
+        data: any,
+        onSuccess: (data: any) => void,
+        onError: (message: string) => void
+    }) => {
+        setLoading(true);
+        const response = await API.put<any>(APIs.partnerMe, data);
+        setLoading(false);
+        if (response.success) {
+            onSuccess(response.data);
+        } else {
+            onError(response.message);
+        }
+    };
+
+    getProfile = async ({ setLoading, onSuccess, onError }: {
+        setLoading: (loading: boolean) => void,
+        onSuccess: (data: any) => void,
+        onError: (message: string) => void
+    }) => {
+        setLoading(true);
+        const response = await API.get<any>(APIs.partnerMe);
+        setLoading(false);
+        if (response.success) {
+            onSuccess(response.data);
+        } else {
+            onError(response.message);
+        }
+    };
 }
+
+export default PartnerAuthService;
