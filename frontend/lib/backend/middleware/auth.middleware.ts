@@ -6,7 +6,7 @@ import connectDB from '../../mongodb';
 export const protect = async (req: NextRequest) => {
   let token;
 
-  const authHeader = req.headers.get('authorization');
+  const authHeader = req.headers.get('Authorization');
   if (authHeader && authHeader.startsWith('Bearer')) {
     token = authHeader.split(' ')[1];
   }
@@ -19,7 +19,7 @@ export const protect = async (req: NextRequest) => {
     await connectDB();
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
     const partner = await Partner.findById(decoded.id);
-    
+
     if (!partner) {
       return { error: 'Partner not found', status: 401 };
     }
