@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server';
 
 export async function proxy(request: NextRequest) {
     const token = request.cookies.get('bwf-auth-token')?.value;
+    console.log("COOKIES", request.cookies.getAll())
     const pathname = request.nextUrl.pathname;
 
     // Define the base API URL for server-side fetching

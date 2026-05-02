@@ -15,6 +15,7 @@ class PartnerAuthService {
         const response = await API.post<PartnerAuthResponse>(APIs.partners, data);
         setLoading(false);
         if (response.success) {
+            console.log("token", response.data?.token as string)
             setToken(response.data?.token as string)
             onSuccess(response.data as PartnerAuthResponse);
         } else {
