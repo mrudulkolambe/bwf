@@ -9,7 +9,7 @@ export async function proxy(request: NextRequest) {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
     const profileUrl = `${apiUrl}/api/partners/me`;
 
-    console.log(`[Proxy] Request:`, { pathname, hasToken: !!token });
+    console.log(`[Proxy] Request:`, { pathname, hasToken: !!token, token: token });
 
     const publicRoutes: string[] = [
         '/',
