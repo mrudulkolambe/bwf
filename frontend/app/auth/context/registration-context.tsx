@@ -139,7 +139,7 @@ export const RegistrationProvider = ({ children }: { children: React.ReactNode }
             }
             setLoading(false);
         }
-    }, [pathname, partnerData]);
+    }, [partnerData]);
 
     return (
         <RegistrationContext.Provider value={{
