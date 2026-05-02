@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     const token = request.cookies.get('bwf-auth-token')?.value;
     console.log("COOKIES", request.cookies.getAll())
     const pathname = request.nextUrl.pathname;
@@ -10,7 +10,7 @@ export async function middleware(request: NextRequest) {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
     const profileUrl = `${apiUrl}/api/partners/me`;
 
-    console.log(`[Middleware] Request:`, { pathname, hasToken: !!token, token: token });
+    console.log(`[Proxy] Request:`, { pathname, hasToken: !!token, token: token });
 
     const publicRoutes: string[] = [
         '/',
@@ -37,7 +37,7 @@ export async function middleware(request: NextRequest) {
     }
 
     try {
-        console.log(`[Middleware] Fetching profile from:`, profileUrl);
+        console.log(`[Proxy] Fetching profile from:`, profileUrl);
 
         const response = await fetch(profileUrl, {
             method: 'GET',
@@ -49,7 +49,7 @@ export async function middleware(request: NextRequest) {
         });
 
         if (response.status === 401) {
-            console.log('[Middleware] Token invalid or profile fetch failed');
+            console.log('[Proxy] Token invalid or profile fetch failed');
             const res = NextResponse.redirect(new URL('/auth/role', request.url));
             res.cookies.delete('bwf-auth-token');
             return res;
@@ -81,7 +81,7 @@ export async function middleware(request: NextRequest) {
 
         return NextResponse.next();
     } catch (error) {
-        console.error('[Middleware] Auth validation error:', error);
+        console.error('[Proxy] Auth validation error:', error);
         // Fallback to next() to avoid blocking completely in case of API downtime, 
         // or redirect to role if strictness is preferred.
         return NextResponse.next();
