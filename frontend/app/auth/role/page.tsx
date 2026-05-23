@@ -33,14 +33,14 @@ export default function RolePage() {
                 icon={User}
                 selected={role === "customer"}
                 onClick={() => handleRoleSelect("customer")}
-            />
+            /> */}
             <RoleButton
                 title="Admin"
                 description="Manage platform operations and users"
                 icon={ShieldCheck}
                 selected={role === "admin"}
-                onClick={() => handleRoleSelect("admin")}
-            /> */}
+                onClick={() => router.push("/login?role=admin")}
+            />
         </div>
     )
 }

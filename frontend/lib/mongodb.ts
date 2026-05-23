@@ -3,8 +3,9 @@ import Tag from '@/models/tag.model';
 import Category from '@/models/category.model';
 import Partner from '@/models/partner.model';
 import User from '@/models/user.model';
+import Admin from '@/models/admin.model';
 
-const _models = { Tag, Category, Partner, User };
+const _models = { Tag, Category, Partner, User, Admin };
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/bwf';
 

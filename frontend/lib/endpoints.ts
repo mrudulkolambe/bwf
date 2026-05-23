@@ -12,7 +12,10 @@ const APIs = {
     partnerMe: apiBuilder('/partners/me'),
     partnerBusiness: apiBuilder('/partners/business'),
     partnerVerifyCode: apiBuilder('/partners/verify-code'),
-    categories: apiBuilder('/categories')
+    categories: apiBuilder('/categories'),
+    adminLogin: apiBuilder('/admin/login'),
+    adminPartners: apiBuilder('/admin/partners'),
+    adminPartnerById: (id: string) => apiBuilder(`/admin/partners/${id}`)
 }
 
 export default APIs

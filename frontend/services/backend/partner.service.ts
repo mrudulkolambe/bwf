@@ -64,6 +64,10 @@ export const getPartnerById = async (id: string): Promise<IPartner | null> => {
   return await Partner.findById(id);
 };
 
+export const getPartnerDashboardData = async (id: string): Promise<IPartner | null> => {
+  return await Partner.findById(id).populate('businessCategory');
+};
+
 export const updatePartner = async (id: string, data: Partial<IPartner>): Promise<IPartner | null> => {
   return await Partner.findByIdAndUpdate(id, data, { new: true });
 };

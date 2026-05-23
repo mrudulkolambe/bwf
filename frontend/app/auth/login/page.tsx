@@ -6,12 +6,14 @@ import InputField from "@/components/app/input-field"
 import { Button } from "@/components/ui/button"
 import { useRegistration } from "../context/registration-context"
 import PartnerAuthService from "../../login/services/partner.auth.service"
+import AdminAuthService from "../../admin/services/admin.auth.service"
 import { setToken } from "@/lib/token"
 
 const partnerAuthService = new PartnerAuthService()
+const adminAuthService = new AdminAuthService()
 
 export default function LoginPage() {
-    const { phone } = useRegistration()
+    const { phone, role, basicDetails } = useRegistration()
     const [code, setCode] = useState("")
     const [loading, setLoading] = useState(false)
     const router = useRouter()
@@ -19,30 +21,47 @@ export default function LoginPage() {
     const handleLogin = async () => {
         if (!code) return
 
-        await partnerAuthService.login({
-            setLoading,
-            phone,
-            code,
-            onSuccess: (data) => {
-                console.log(data)
-                if (data.token) {
-                    setToken(data.token)
+        if (role === "admin") {
+            const email = basicDetails.email
+            await adminAuthService.verifyOTP({
+                setLoading,
+                phone,
+                email,
+                code,
+                onSuccess: (data) => {
+                    router.push("/admin/dashboard")
+                },
+                onError: (message) => {
+                    console.error(message)
+                    alert(message)
                 }
-                if (!data.partner.onboarding.basic) {
-                    router.push("/auth/basic")
-                } else if (!data.partner.onboarding.business) {
-                    router.push("/auth/business")
-                } else if (!data.partner.onboarding.completed) {
-                    router.push("/auth/verify")
-                } else {
-                    router.push("/dashboard")
+            })
+        } else {
+            await partnerAuthService.login({
+                setLoading,
+                phone,
+                code,
+                onSuccess: (data) => {
+                    console.log(data)
+                    if (data.token) {
+                        setToken(data.token)
+                    }
+                    if (!data.partner.onboarding.basic) {
+                        router.push("/auth/basic")
+                    } else if (!data.partner.onboarding.business) {
+                        router.push("/auth/business")
+                    } else if (!data.partner.onboarding.completed) {
+                        router.push("/auth/verify")
+                    } else {
+                        router.push("/dashboard")
+                    }
+                },
+                onError: (message) => {
+                    console.error(message)
+                    alert(message)
                 }
-            },
-            onError: (message) => {
-                console.error(message)
-                alert(message)
-            }
-        })
+            })
+        }
     }
 
     return (
@@ -50,13 +69,19 @@ export default function LoginPage() {
             <div className="mb-2">
                 <h1 className="text-2xl font-bold">Welcome back</h1>
                 <p className="text-muted-foreground">
-                    Code sent to admin. Contact{" "}
-                    <a 
-                        href={`tel:${process.env.NEXT_PUBLIC_SUPPORT_PHONE?.replace(/\s+/g, '')}`}
-                        className="font-semibold text-foreground hover:underline whitespace-nowrap"
-                    >
-                        {process.env.NEXT_PUBLIC_SUPPORT_PHONE}
-                    </a>
+                    {role === "admin" ? (
+                        `Code sent to your email (${basicDetails.email}).`
+                    ) : (
+                        <>
+                            Code sent to admin. Contact{" "}
+                            <a 
+                                href={`tel:${process.env.NEXT_PUBLIC_SUPPORT_PHONE?.replace(/\s+/g, '')}`}
+                                className="font-semibold text-foreground hover:underline whitespace-nowrap"
+                            >
+                                {process.env.NEXT_PUBLIC_SUPPORT_PHONE}
+                            </a>
+                        </>
+                    )}
                 </p>
             </div>
 
@@ -83,8 +108,9 @@ export default function LoginPage() {
                 onClick={handleLogin}
                 disabled={loading || !code}
                 className="w-full h-12 mt-2"
+                loading={loading}
             >
-                {loading ? "Verifying..." : "Login"}
+                Verify & Sign In
             </Button>
 
             <Button

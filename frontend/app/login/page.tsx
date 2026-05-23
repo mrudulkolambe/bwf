@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import RoleButton from "./components/role"
 import { Briefcase, ShieldCheck, User } from "lucide-react"
 import InputField from "@/components/app/input-field"
@@ -8,15 +9,21 @@ import { Button } from "@/components/ui/button"
 import SelectField from "@/components/app/select-field"
 import PartnerAuthService from "./services/partner.auth.service"
 import CategoryService from "./services/category.service"
+import AdminAuthService from "../admin/services/admin.auth.service"
 import { CategoryResponse } from "./services/types/category.response.types"
+import { setToken } from "@/lib/token"
 
 const partnerAuthService = new PartnerAuthService();
 const categoryService = new CategoryService();
+const adminAuthService = new AdminAuthService();
 
 const LoginPage = () => {
+    const router = useRouter()
     const [step, setStep] = useState<"role-selection" | "phone" | "basic" | "business" | "verify" | "login">("role-selection")
     const [role, setRole] = useState<"partner" | "customer" | "admin" | null>(null)
     const [phone, setPhone] = useState<string>("")
+    const [email, setEmail] = useState<string>("")
+    const [otpCode, setOtpCode] = useState<string>("")
     const [loading, setLoading] = useState<boolean>(false)
     const [categories, setCategories] = useState<CategoryResponse[]>([])
     const [basicDetails, setBasicDetails] = useState({
@@ -40,10 +47,9 @@ const LoginPage = () => {
 
     const fetchCategories = async () => {
         await categoryService.getCategories({
-            setLoading,
+            setLoading: () => { },
             lang: "en",
             onSuccess: (data: CategoryResponse[]) => {
-                console.log(data)
                 setCategories(data)
             },
             onError: (message: string) => {
@@ -52,8 +58,17 @@ const LoginPage = () => {
         })
     }
 
+    // Direct url check for admin query parameter
     useEffect(() => {
         fetchCategories()
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search)
+            const roleParam = params.get('role')
+            if (roleParam === 'admin') {
+                setRole('admin')
+                setStep('phone')
+            }
+        }
     }, [])
 
     const checkPhone = async () => {
@@ -68,12 +83,74 @@ const LoginPage = () => {
                 }
             },
             onError: (message) => {
-                // Handle error if needed
                 console.error(message);
+                alert(message);
             }
         });
     }
 
+    const handleContinue = async () => {
+        if (role === "admin") {
+            if (!phone || !email) {
+                alert("Please enter both phone number and email")
+                return
+            }
+            await adminAuthService.requestOTP({
+                setLoading,
+                phone,
+                email,
+                onSuccess: (message) => {
+                    alert(message)
+                    setStep("verify")
+                },
+                onError: (message) => {
+                    alert(message)
+                }
+            })
+        } else {
+            checkPhone()
+        }
+    }
+
+    const handleVerify = async () => {
+        if (role === "admin") {
+            await adminAuthService.verifyOTP({
+                setLoading,
+                phone,
+                email,
+                code: otpCode,
+                onSuccess: (data) => {
+                    router.push("/admin/dashboard")
+                },
+                onError: (message) => {
+                    alert(message)
+                }
+            })
+        } else {
+            await partnerAuthService.login({
+                setLoading,
+                phone,
+                code: otpCode,
+                onSuccess: (data) => {
+                    if (data.token) {
+                        setToken(data.token)
+                    }
+                    if (!data.partner.onboarding.basic) {
+                        router.push("/auth/basic")
+                    } else if (!data.partner.onboarding.business) {
+                        router.push("/auth/business")
+                    } else if (!data.partner.onboarding.completed) {
+                        router.push("/auth/verify")
+                    } else {
+                        router.push("/dashboard")
+                    }
+                },
+                onError: (message) => {
+                    alert(message)
+                }
+            })
+        }
+    }
 
     return (
         <>
@@ -90,7 +167,7 @@ const LoginPage = () => {
                                     <p className="text-muted-foreground">Tell us how you plan to use the platform</p>
                                 </div>
                                 <RoleButton
-                                    title="Partner"
+                                    title="Partner11"
                                     description="Provide services and build your business"
                                     icon={Briefcase}
                                     selected={role === "partner"}
@@ -111,7 +188,10 @@ const LoginPage = () => {
                                     description="Manage platform operations and users"
                                     icon={ShieldCheck}
                                     selected={role === "admin"}
-                                    onClick={() => setRole("admin")}
+                                    onClick={() => {
+                                        setRole("admin")
+                                        setStep("phone")
+                                    }}
                                 />
                             </div>
                         </>
@@ -123,19 +203,86 @@ const LoginPage = () => {
                         <>
                             <div className="flex flex-col gap-4 w-full max-w-sm mt-12">
                                 <div className="mb-2">
-                                    <h1 className="text-2xl font-bold">Enter your phone number</h1>
-                                    <p className="text-muted-foreground">We will send you a verification code</p>
+                                    <h1 className="text-2xl font-bold">
+                                        {role === "admin" ? "Admin Authentication" : "Enter your phone number"}
+                                    </h1>
+                                    <p className="text-muted-foreground">
+                                        {role === "admin"
+                                            ? "Enter your phone and email to receive an OTP code"
+                                            : "We will send you a verification code"
+                                        }
+                                    </p>
                                 </div>
                                 <InputField
                                     placeholder="Enter your phone number"
                                     id="phone"
                                     label="Phone number"
-                                    type="number"
+                                    type="text"
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value)}
                                 />
 
-                                <Button onClick={() => checkPhone()}>Continue</Button>
+                                {role === "admin" && (
+                                    <InputField
+                                        placeholder="Enter your email address"
+                                        id="email"
+                                        label="Email address"
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                    />
+                                )}
+
+                                <Button
+                                    onClick={handleContinue}
+                                    disabled={loading || !phone || (role === "admin" && !email)}
+                                    loading={loading}
+                                >
+                                    Continue
+                                </Button>
+                            </div>
+                        </>
+                    )
+                }
+
+                {
+                    step === "verify" && (
+                        <>
+                            <div className="flex flex-col gap-4 w-full max-w-sm mt-12">
+                                <div className="mb-2">
+                                    <h1 className="text-2xl font-bold">Verify Account</h1>
+                                    <p className="text-muted-foreground">
+                                        {role === "admin" ? (
+                                            `Enter the 6-digit OTP code sent to ${email}`
+                                        ) : (
+                                            <>
+                                                Code sent to admin. Contact{" "}
+                                                <a
+                                                    href={`tel:${process.env.NEXT_PUBLIC_SUPPORT_PHONE?.replace(/\s+/g, '')}`}
+                                                    className="font-semibold text-foreground hover:underline whitespace-nowrap"
+                                                >
+                                                    {process.env.NEXT_PUBLIC_SUPPORT_PHONE}
+                                                </a>
+                                            </>
+                                        )}
+                                    </p>
+                                </div>
+                                <InputField
+                                    placeholder="Enter verification code"
+                                    id="code"
+                                    label="Verification Code"
+                                    type="text"
+                                    value={otpCode}
+                                    onChange={(e) => setOtpCode(e.target.value)}
+                                />
+
+                                <Button
+                                    onClick={handleVerify}
+                                    disabled={loading || !otpCode}
+                                    loading={loading}
+                                >
+                                    Verify & Continue
+                                </Button>
                             </div>
                         </>
                     )
@@ -164,7 +311,7 @@ const LoginPage = () => {
                                     placeholder="Enter your phone number"
                                     id="phone"
                                     label="Phone number"
-                                    type="number"
+                                    type="text"
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value)}
                                     disabled={true}
